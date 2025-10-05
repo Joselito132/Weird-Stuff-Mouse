@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragón Siguiendo el Cursor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            overflow: hidden;
+            cursor: none;
+            position: relative;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .dragon {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+            z-index: 1000;
+        }
+
+        .dragon-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .head {
+            position: absolute;
+            width: 35px;
+            height: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 50% 50% 30% 30%;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset -5px 0 10px rgba(0,0,0,0.2);
+            border: 2px solid #212529;
+        }
+
+        .snout {
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            background: #dee2e6;
+            border-radius: 50%;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid #212529;
+        }
+
+        .eye {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #212529;
+            border-radius: 50%;
+            top: 12px;
+            border: 2px solid #f8f9fa;
+        }
+
+        .eye.left { left: 8px; }
+        .eye.right { right: 8px; }
+
+        .pupil {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #e74c3c;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px #e74c3c; }
+            50% { box-shadow: 0 0 10px #e74c3c, 0 0 15px #e74c3c; }
+        }
+
+        .horn {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 15px solid #212529;
+            top: -10px;
+        }
+
+        .horn.left { left: 6px; }
+        .horn.right { right: 6px; }
+
+        .neck {
+            position: absolute;
+            width: 25px;
+            height: 35px;
+            background: linear-gradient(90deg, #f8f9fa 0%, #212529 50%, #f8f9fa 100%);
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 40%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+            border: 1px solid #495057;
+        }
+
+        .body-segment {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #212529 0%, #f8f9fa 50%, #212529 100%);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+            border: 1px solid #495057;
+        }
+
+        .segment1 { left: 50px; width: 32px; height: 32px; }
+        .segment2 { left: 75px; width: 28px; height: 28px; }
+        .segment3 { left: 98px; width: 25px; height: 25px; }
+
+        .wing {
+            position: absolute;
+            width: 45px;
+            height: 35px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #adb5bd 100%);
+            border-radius: 50% 0 50% 0;
+            top: 50%;
+            animation: flap 0.6s infinite alternate;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            border: 2px solid #212529;
+        }
+
+        .wing.left {
+            left: 45px;
+            transform: translateY(-50%) rotate(-45deg);
+        }
+
+        .wing.right {
+            left: 45px;
+            transform: translateY(-50%) rotate(45deg) scaleX(-1);
+        }
+
+        @keyframes flap {
+            0% { transform: translateY(-50%) rotate(-45deg) translateY(0); }
+            100% { transform: translateY(-50%) rotate(-55deg) translateY(-8px); }
+        }
+
+        .wing.right {
+            animation: flap-right 0.6s infinite alternate;
+        }
+
+        @keyframes flap-right {
+            0% { transform: translateY(-50%) rotate(45deg) scaleX(-1) translateY(0); }
+            100% { transform: translateY(-50%) rotate(55deg) scaleX(-1) translateY(-8px); }
+        }
+
+        .tail {
+            position: absolute;
+            width: 80px;
+            height: 20px;
+            background: linear-gradient(90deg, #212529 0%, #495057 30%, #adb5bd 60%, #dee2e6 100%);
+            border-radius: 50%;
+            left: 115px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: wag 1.2s infinite;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            border: 1px solid #212529;
+        }
+
+        @keyframes wag {
+            0%, 100% { transform: translateY(-50%) rotate(-5deg); }
+            50% { transform: translateY(-50%) rotate(5deg); }
+        }
+
+        .tail-end {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-left: 25px solid #f8f9fa;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .spine {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            border-bottom: 8px solid #212529;
+            top: -6px;
+        }
+
+        .spine1 { left: 45px; }
+        .spine2 { left: 70px; }
+        .spine3 { left: 95px; }
+        .spine4 { left: 120px; }
+
+        .smoke {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(200,200,200,0.3) 50%, transparent 70%);
+            border-radius: 50%;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: smoke 0.8s infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes smoke {
+            0% { transform: translateY(-50%) translateX(0) scale(1); opacity: 0.7; }
+            100% { transform: translateY(-50%) translateX(-30px) scale(1.5); opacity: 0; }
+        }
+
+        .cursor-indicator {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+            box-shadow: 0 0 15px rgba(255,255,255,0.6);
+        }
+
+        .instruction {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 100;
+            animation: fadeIn 2s;
+            text-align: center;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            z-index: 100;
+            background: rgba(0,0,0,0.5);
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .controls div {
+            margin: 5px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="instruction">🐉 Mueve el cursor y el dragón te seguirá</div>
+    
+    <div class="controls">
+        <div>🔥 <strong>Clic Izquierdo:</strong> Lanzar bola de fuego</div>
+        <div>⚡ <strong>Clic Derecho:</strong> Invocar relámpago</div>
+        <div>💪 <strong>Clic Central:</strong> Aumentar tamaño</div>
+    </div>
+    
+    <div class="cursor-indicator" id="cursor"></div>
+    
+    <div class="dragon" id="dragon">
+        <div class="dragon-body">
+            <div class="smoke"></div>
+            <div class="wing left"></div>
+            <div class="wing right"></div>
+            
+            <div class="head">
+                <div class="horn left"></div>
+                <div class="horn right"></div>
+                <div class="eye left">
+                    <div class="pupil"></div>
+                </div>
+                <div class="eye right">
+                    <div class="pupil"></div>
+                </div>
+                <div class="snout"></div>
+            </div>
+            
+            <div class="neck"></div>
+            <div class="body-segment segment1"></div>
+            <div class="body-segment segment2"></div>
+            <div class="body-segment segment3"></div>
+            
+            <div class="spine spine1"></div>
+            <div class="spine spine2"></div>
+            <div class="spine spine3"></div>
+            <div class="spine spine4"></div>
+            
+            <div class="tail">
+                <div class="tail-end"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Crear estrellas
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Seguimiento del cursor
+        const dragon = document.getElementById('dragon');
+        const cursor = document.getElementById('cursor');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let dragonX = mouseX;
+        let dragonY = mouseY;
+
+        // Estado de los botones del mouse
+        const input = {
+            mouse: {
+                left: false,
+                middle: false,
+                right: false
+            }
+        };
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursor.style.left = mouseX - 10 + 'px';
+            cursor.style.top = mouseY - 10 + 'px';
+        });
+
+        // Detectar clics del mouse (CÓDIGO CORREGIDO)
+        document.addEventListener("mousedown", function(evento) {
+            if(evento.button === 0) {
+                input.mouse.left = true;
+                createFireball();
+                console.log("Clic izquierdo detectado");
+            }
+            else if (evento.button === 1) {
+                input.mouse.middle = true;
+                dragonGrow();
+                console.log("Clic central detectado");
+            }
+            else if (evento.button === 2) {
+                input.mouse.right = true;
+                createLightning();
+                console.log("Clic derecho detectado");
+            }
+        });
+
+        document.addEventListener("mouseup", function(evento) {
+            if(evento.button === 0) {
+                input.mouse.left = false;
+            }
+            else if (evento.button === 1) {
+                input.mouse.middle = false;
+            }
+            else if (evento.button === 2) {
+                input.mouse.right = false;
+            }
+        });
+
+        // Prevenir menú contextual del clic derecho
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Crear bola de fuego (clic izquierdo)
+        function createFireball() {
+            const fireball = document.createElement('div');
+            fireball.style.position = 'absolute';
+            fireball.style.width = '20px';
+            fireball.style.height = '20px';
+            fireball.style.background = 'radial-gradient(circle, #ff6b00 0%, #ff0000 50%, transparent 80%)';
+            fireball.style.borderRadius = '50%';
+            fireball.style.left = dragonX + 'px';
+            fireball.style.top = dragonY + 'px';
+            fireball.style.pointerEvents = 'none';
+            fireball.style.boxShadow = '0 0 20px #ff6b00';
+            fireball.style.zIndex = '500';
+            document.body.appendChild(fireball);
+
+            const angle = Math.atan2(mouseY - dragonY, mouseX - dragonX);
+            let posX = dragonX;
+            let posY = dragonY;
+            const speed = 8;
+
+            const interval = setInterval(() => {
+                posX += Math.cos(angle) * speed;
+                posY += Math.sin(angle) * speed;
+                fireball.style.left = posX + 'px';
+                fireball.style.top = posY + 'px';
+
+                if (posX < 0 || posX > window.innerWidth || posY < 0 || posY > window.innerHeight) {
+                    clearInterval(interval);
+                    fireball.remove();
+                }
+            }, 16);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                fireball.remove();
+            }, 2000);
+        }
+
+        // Hacer crecer al dragón temporalmente (clic central)
+        function dragonGrow() {
+            dragon.style.transition = 'all 0.3s ease';
+            dragon.style.transform = `rotate(${Math.atan2(mouseY - dragonY, mouseX - dragonX) * (180 / Math.PI)}deg) scale(1.5)`;
+            
+            setTimeout(() => {
+                dragon.style.transform = `rotate(${Math.atan2(mouseY - dragonY, mouseX - dragonX) * (180 / Math.PI)}deg) scale(1)`;
+                setTimeout(() => {
+                    dragon.style.transition = 'transform 0.1s ease-out';
+                }, 300);
+            }, 300);
+        }
+
+        // Crear relámpago (clic derecho)
+        function createLightning() {
+            const lightning = document.createElement('div');
+            lightning.style.position = 'absolute';
+            lightning.style.width = '4px';
+            lightning.style.height = '100vh';
+            lightning.style.background = 'linear-gradient(180deg, transparent 0%, #fff 20%, #00d9ff 40%, #fff 60%, transparent 100%)';
+            lightning.style.left = mouseX + 'px';
+            lightning.style.top = '0';
+            lightning.style.pointerEvents = 'none';
+            lightning.style.boxShadow = '0 0 30px #00d9ff, 0 0 60px #00d9ff';
+            lightning.style.zIndex = '500';
+            lightning.style.animation = 'flash 0.2s';
+            document.body.appendChild(lightning);
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes flash {
+                    0%, 100% { opacity: 0; }
+                    50% { opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            setTimeout(() => {
+                lightning.remove();
+            }, 200);
+        }
+
+        function animate() {
+            // Suavizar el movimiento del dragón
+            const dx = mouseX - dragonX;
+            const dy = mouseY - dragonY;
+            
+            dragonX += dx * 0.08;
+            dragonY += dy * 0.08;
+
+            // Calcular ángulo de rotación
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+            dragon.style.left = dragonX - 100 + 'px';
+            dragon.style.top = dragonY - 30 + 'px';
+            if (!dragon.style.transition.includes('scale')) {
+                dragon.style.transform = `rotate(${angle}deg)`;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
